@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator</title>
+    <link rel="manifest" href="./manifest.json">
+
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+
+        .calculator {
+            width: 400px;
+            height: auto;
+            padding: 20px;
+            background-color: #333;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            color: #fff;
+            display: flex;
+            flex-direction: column; /* Menambahkan flexbox agar footer bisa berada di bawah */
+        }
+
+        .display {
+            width: 95%;
+            height: 40px;
+            background-color: #444;
+            border: none;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #fff;
+            padding: 10px;
+            text-align: right;
+        }
+
+        .history {
+            width: 97%;
+            height: 60px;
+            background-color: #555;
+            border: none;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-size: 16px;
+            color: #fff;
+            padding: 5px;
+            text-align: right;
+            margin-bottom: 20px;
+            overflow-y: scroll;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .button {
+            width: 100%;
+            padding: 30px;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: #333;
+            background-color: #ddd;
+            transition: background-color 0.3s ease;
+        }
+
+        .button.operation {
+            background-color: #ff9500;
+            color: #fff;
+        }
+
+        .button.equal {
+            background-color: #0080ff;
+            color: #fff;
+            grid-column: span 3;
+        }
+
+        .button:hover {
+            background-color: #bbb;
+        }
+       
+        .button.refresh {
+            background-color: #008000; 
+            color: #fff;
+            border-radius: 5px;
+            font-size: 18px;
+            padding: 15px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .button.refresh:hover {
+            background-color: #0056b3; /* Warna biru lebih gelap saat hover */
+        }
+
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            width: 300px;
+            margin-top: auto; /* Menempatkan footer di bawah */
+        }
+
+        footer a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div class="calculator">
+    <input type="text" class="history" id="history" disabled>
+    <input type="text" class="display" id="display" disabled>
+    <div class="buttons">
+
+        <button class="button" onclick="clearDisplay()">C</button>
+        <button class="button" onclick="deleteLast()">DEL</button>
+        <button class="button operation" onclick="appendValue('(')">(</button>
+        <button class="button operation" onclick="appendValue(')')">)</button>
+       
+        <button class="button" onclick="appendValue('7')">7</button>
+        <button class="button" onclick="appendValue('8')">8</button>
+        <button class="button" onclick="appendValue('9')">9</button>
+        <button class="button operation" onclick="appendValue('/')">/</button>
+        
+        <button class="button" onclick="appendValue('4')">4</button>
+        <button class="button" onclick="appendValue('5')">5</button>
+        <button class="button" onclick="appendValue('6')">6</button>
+        <button class="button operation" onclick="appendValue('*')">*</button>
+        
+        <button class="button" onclick="appendValue('1')">1</button>
+        <button class="button" onclick="appendValue('2')">2</button>
+        <button class="button" onclick="appendValue('3')">3</button>
+        <button class="button operation" onclick="appendValue('+')">+</button>
+        
+        <button class="button operation" onclick="appendValue('%')">%</button>
+        <button class="button" onclick="appendValue('0')">0</button>
+        <button class="button" onclick="appendValue('.')">.</button>
+        <button class="button operation" onclick="appendValue('-')">-</button>
+
+        <button class="button refresh" onclick="refreshPage()">Refresh</button>
+
+      
+        <button class="button equal" onclick="calculate()">=</button>
+    </div>
+
+    <!-- Footer di dalam kalkulator -->
+    <footer>
+        <p>© 2024 @nemits.com</p>
+    </footer>
+</div>
+
+<script>
+    const display = document.getElementById("display");
+    const history = document.getElementById("history");
+    let historyContent = ""; // Menyimpan seluruh history dalam string
+
+    function appendValue(value) {
+        display.value += value;
+    }
+
+    function clearDisplay() {
+        display.value = "";
+    }
+
+    function deleteLast() {
+        display.value = display.value.slice(0, -1);
+    }
+
+    function calculate() {
+        try {
+            let expression = display.value;
+
+            // Mengganti persen dengan logika yang benar
+            expression = expression.replace(/(\d+(\.\d+)?)%/g, (match, p1) => {
+                const lastNumberMatch = /(\d+(\.\d+)?)(?!.*\d)/.exec(expression.slice(0, expression.indexOf(match)));
+                const lastNumber = lastNumberMatch ? lastNumberMatch[0] : 0;
+                return `(${lastNumber} * ${p1} / 100)`;
+            });
+
+            // Mengelompokkan penjumlahan yang diikuti perkalian
+            expression = expression.replace(/(\d+(\.\d+)?(?:\+[\d\.\d+]+)+)(\*[\d\.\d+]+)/g, (match, p1, p2, p3) => {
+                return `(${p1})${p3}`;
+            });
+
+            // Evaluasi ekspresi
+            const result = eval(expression);
+
+            // Menambahkan hasil baru ke dalam history
+            historyContent += `${expression} = ${result}\n`;
+
+            // Menampilkan hasil dan mengupdate history
+            display.value = result;
+            history.value = historyContent; // Update tampilan history
+        } catch (error) {
+            display.value = "Error";
+        }
+    }
+
+    // Daftar service worker
+    if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("./service-worker.js")
+        .then((registration) => {
+            console.log("Service Worker terdaftar dengan sukses:", registration.scope);
+        })
+        .catch((error) => {
+            console.log("Service Worker pendaftaran gagal:", error);
+        });
+    }
+
+    // Fungsi untuk menyegarkan halaman
+    function refreshPage() {
+        location.reload(); // Menyegarkan halaman
+    }
+</script>
+
+</body>
+</html>
