@@ -110,7 +110,7 @@
             text-align: center;
             padding: 20px;
             width: 300px;
-            margin-top: auto; /* Menempatkan footer di bawah */
+            margin-top: auto; 
         }
 
         footer a {
@@ -162,7 +162,6 @@
         <button class="button equal" onclick="calculate()">=</button>
     </div>
 
-    <!-- Footer di dalam kalkulator -->
     <footer>
         <p>© 2024 @nemits.com</p>
     </footer>
@@ -171,7 +170,7 @@
 <script>
     const display = document.getElementById("display");
     const history = document.getElementById("history");
-    let historyContent = ""; // Menyimpan seluruh history dalam string
+    let historyContent = ""; 
 
     function appendValue(value) {
         display.value += value;
@@ -183,6 +182,14 @@
 
     function deleteLast() {
         display.value = display.value.slice(0, -1);
+    }
+
+    function formatWithThousandSeparator(number) {
+        number = parseFloat(number);
+        if (isNaN(number)) {
+            return number; // Jika bukan angka, kembalikan nilai seperti semula
+        }
+        return number.toLocaleString(); // Kembalikan angka dengan pemisah ribuan
     }
 
     function calculate() {
@@ -204,18 +211,21 @@
             // Evaluasi ekspresi
             const result = eval(expression);
 
-            // Menambahkan hasil baru ke dalam history
-            historyContent += `${expression} = ${result}\n`;
+            // Format hasil dengan pemisah ribuan
+            const formattedResult = formatWithThousandSeparator(result);
 
-            // Menampilkan hasil dan mengupdate history
-            display.value = result;
+            // Menambahkan hasil baru ke dalam history
+            historyContent += `${expression} = ${formattedResult}\n`;
+
+            // Menampilkan hasil yang diformat
+            display.value = formattedResult;
             history.value = historyContent; // Update tampilan history
         } catch (error) {
             display.value = "Error";
         }
     }
 
-    // Daftar service worker
+    // Registrasi Service Worker
     if ("serviceWorker" in navigator) {
         navigator.serviceWorker.register("./service-worker.js")
         .then((registration) => {
